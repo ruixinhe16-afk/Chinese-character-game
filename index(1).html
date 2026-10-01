@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>找汉字游戏</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#f7f4ef;font-family:Arial,"Microsoft YaHei",sans-serif;display:flex;justify-content:center;align-items:center;padding:24px;color:#333}
+.game{width:min(900px,100%);text-align:center}
+.round{font-size:18px;color:#777;margin-bottom:8px}
+.instruction{font-size:30px;font-weight:700;margin-bottom:20px}
+.message{height:30px;font-size:19px;font-weight:700;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.char{min-height:100px;border:2px solid #ddd5cc;border-radius:14px;background:white;font-size:38px;cursor:pointer;transition:.15s}
+.char:hover{transform:translateY(-3px);background:#faf8f5}
+.char.wrong{animation:shake .25s;background:#ffebee;border-color:#ef9a9a}
+.char.correct{background:#e8f5e9;border-color:#81c784}
+.finished{font-size:32px;font-weight:700;padding:60px 20px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media(max-width:650px){.grid{grid-template-columns:repeat(4,1fr);gap:10px}.char{min-height:80px;font-size:30px}.instruction{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="game"><div id="gameArea"></div></div>
+<script>
+const allChars=["你","是","那","哪","国","王","吗","马","叫","什么","名字","十么","认","人","很","跟","我","找","妈","好"];
+const answers=["吗","什么","认","哪","我"];
+let round=0;
+
+function shuffle(a){
+  a=[...a];
+  for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+
+function render(){
+  const area=document.getElementById("gameArea");
+  if(round>=answers.length){
+    area.innerHTML='<div class="finished">🎉 全部完成！</div>';
+    return;
+  }
+  const answer=answers[round];
+  area.innerHTML=`
+    <div class="round">第 ${round+1} 轮 / 共 ${answers.length} 轮</div>
+    <div class="instruction">请选择正确的汉字</div>
+    <div class="message" id="message"></div>
+    <div class="grid" id="grid"></div>`;
+  const grid=document.getElementById("grid");
+  const message=document.getElementById("message");
+
+  shuffle(allChars).forEach(char=>{
+    const b=document.createElement("button");
+    b.className="char";
+    b.textContent=char;
+    b.onclick=()=>{
+      if(char===answer){
+        b.classList.add("correct");
+        message.textContent="✓ 正确！";
+        message.style.color="#4caf50";
+        grid.querySelectorAll("button").forEach(x=>x.disabled=true);
+        setTimeout(()=>{round++;render()},700);
+      }else{
+        b.classList.add("wrong");
+        message.textContent="✗ 错误，再试一次！";
+        message.style.color="#e53935";
+        setTimeout(()=>{b.classList.remove("wrong");message.textContent=""},500);
+      }
+    };
+    grid.appendChild(b);
+  });
+}
+render();
+</script>
+</body>
+</html>
